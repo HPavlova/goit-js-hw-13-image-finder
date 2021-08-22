@@ -15,22 +15,21 @@ refs.imagesContainer.addEventListener('click', onOpenModal);
 function onSearch(event) {
   event.preventDefault();
 
-  newsApiService.query = event.currentTarget.elements.query.value;
+  newsApiService.query = event.currentTarget.elements.query.value.trim();
   console.log(newsApiService.query);
 
   if (newsApiService.query === '') {
-    const myNotice = error({
-      type: 'notice',
-      delay: 8000,
-      text: 'Too many matches found. Please enter a more specific query!',
-    });
-    return myNotice;
+    return creatNotice();
   }
   newsApiService.resetPage();
 
   newsApiService
     .fetchImages()
     .then(data => {
+      if (data.length < 12) {
+        return creatNotice();
+      }
+
       clearImagesContainer();
       renderImages(data);
       onScrollMore();
@@ -71,4 +70,13 @@ function onScrollMore() {
   const observer = new IntersectionObserver(onEntry, options);
 
   observer.observe(refs.target);
+}
+
+function creatNotice() {
+  const myNotice = error({
+    type: 'notice',
+    delay: 8000,
+    text: 'Too many matches found. Please enter a more specific query!',
+  });
+  return myNotice;
 }
